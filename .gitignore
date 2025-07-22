@@ -1,0 +1,21 @@
+# Ignorar pastas e arquivos temporários
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ambientes virtuais
+venv/
+.env/
+
+# Dados brutos e processados
+data/raw/
+data/processed/
+data/cleaned/
+
+# Logs
+*.log
+
+# Arquivos de IDE
+.vscode/
+.idea/
