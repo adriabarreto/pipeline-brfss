@@ -36,6 +36,6 @@ jobs:
           body: |
             Arquivos CSV limpos gerados pela pipeline.
           files: |
-            cleaned/*.csv
+            data/cleaned/*.csv
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
