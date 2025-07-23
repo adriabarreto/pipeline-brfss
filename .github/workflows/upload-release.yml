@@ -4,37 +4,49 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main  # ou a branch que você está usando
+      - main  # ajuste conforme sua branch principal
 
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repositório
         uses: actions/checkout@v3
 
-      - name: Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Instalar dependências
+      - name: Verificar existência dos CSVs limpos
+        id: verificar_csv
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if ls data/cleaned/*.csv 1> /dev/null 2>&1; then
+            echo "CSV limpo encontrado."
+            echo "::set-output name=csv_existe::true"
+          else
+            echo "Nenhum CSV limpo encontrado."
+            echo "::set-output name=csv_existe::false"
+          fi
 
-      - name: Rodar a pipeline
+      - name: Rodar a pipeline (se CSVs não existirem)
+        if: steps.verificar_csv.outputs.csv_existe == 'false'
         run: |
-          python src/pipeline_brfss.py  # ajuste para o caminho do seu script
+          python src/pipeline_brfss.py
 
-      - name: Criar release e enviar CSVs
+      - name: Verificar novamente os CSVs limpos
+        id: verificar_csv_apos
+        run: |
+          if ls data/cleaned/*.csv 1> /dev/null 2>&1; then
+            echo "CSV limpo encontrado após pipeline."
+            echo "::set-output name=csv_existe_apos::true"
+          else
+            echo "Nenhum CSV limpo encontrado após pipeline."
+            echo "::set-output name=csv_existe_apos::false"
+          fi
+
+      - name: Criar release e enviar CSVs (se existirem)
+        if: steps.verificar_csv_apos.outputs.csv_existe_apos == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: v${{ github.run_number }}-csvs
-          name: Release de CSVs ${{ github.run_number }}
-          body: |
-            Arquivos CSV limpos gerados pela pipeline.
+          tag_name: release-${{ github.run_number }}-${{ github.sha }}
+          name: Release ${{ github.run_number }}
+          body: Arquivos CSV limpos gerados pela pipeline.
           files: |
             data/cleaned/*.csv
         env:
