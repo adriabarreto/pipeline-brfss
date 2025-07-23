@@ -9,13 +9,24 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repositório
         uses: actions/checkout@v3
 
-      - name: Rodar a pipeline (opcional)
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
         run: |
-          python src/pipeline_brfss.py  # ajuste para o nome correto da sua pipeline
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Rodar a pipeline
+        run: |
+          python src/pipeline_brfss.py  # ajuste para o caminho do seu script
 
       - name: Criar release e enviar CSVs
         uses: softprops/action-gh-release@v1
