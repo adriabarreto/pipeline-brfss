@@ -1,0 +1,30 @@
+name: Upload CSVs to Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main  # ou a branch que você está usando
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repositório
+        uses: actions/checkout@v3
+
+      - name: Rodar a pipeline (opcional)
+        run: |
+          python src/pipeline_brfss.py  # ajuste para o nome correto da sua pipeline
+
+      - name: Criar release e enviar CSVs
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ github.run_number }}-csvs
+          name: Release de CSVs ${{ github.run_number }}
+          body: |
+            Arquivos CSV limpos gerados pela pipeline.
+          files: |
+            cleaned/*.csv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
