@@ -29,7 +29,9 @@ COLUNAS_KAGGLE = [
     'DIABETE3', 'DIABETE4', 'SEX', 'MARITAL', 'EDUCA', 'EMPLOY1', 'INCOME2',
     'GENHLTH', 'PHYSHLTH', 'MENTHLTH', 'POORHLTH', 'HLTHPLN1',
     'CHECKUP1', 'BPHIGH4', 'TOLDHI2', 'CVDSTRK3', 'CHCSCNCR', 'CHCOCNCR',
-    'CHCCOPD1', 'HAVARTH3', 'ADDEPEV2', 'CHCKIDNY', 'DIFFWALK'
+    'CHCCOPD1', 'HAVARTH3', 'ADDEPEV2', 'CHCKIDNY', 'DIFFWALK', 'CHCCOPD2', 'HAVARTH4',
+    'ADDEPEV3', 'CHCKDNY2', 'BPHIGH6', 'TOLDHI3', 'CHCCOPD3', 'HAVARTH5', 'INCOME3', '_HLTHPLN',
+    'CHCSCNC1', 'CHCOCNC1'
 ]
 
 # Mapeamento para binarizar a variável alvo 'Diabetes'
@@ -65,7 +67,19 @@ RENOMEAR_COLUNAS = {
     'HAVARTH3': 'HavArth3',
     'ADDEPEV2': 'AddEpev2',
     'CHCKIDNY': 'ChkIdny',
-    'DIFFWALK': 'DiffWalk'
+    'DIFFWALK': 'DiffWalk',
+    'CHCCOPD2': 'ChcCopd1',
+    'HAVARTH4': 'HavArth3',
+    'ADDEPEV3': 'AddEpev2',
+    'CHCKDNY2': 'ChkIdny',
+    'BPHIGH6' : 'BpHigh4',
+    'TOLDHI3' : 'ToldHi2',
+    'CHCCOPD3': 'ChcCopd1',
+    'HAVARTH5': 'HavArth3',
+    'INCOME3': 'Income2',
+    '_HLTHPLN': 'HlthPln1',
+    'CHCSCNC1': 'ChcScncr',
+    'CHCOCNC1': 'CHCOCNC1'
 }
 
 # Valores inválidos que serão convertidos em NaN (dados ausentes, recusados, etc)
@@ -81,6 +95,19 @@ COLUNAS_CATEGORICAS = [
     'Checkup1', 'BpHigh4', 'ToldHi2', 'CvdStrk3', 'ChcScncr', 'ChcoCncr',
     'ChcCopd1', 'HavArth3', 'AddEpev2', 'ChkIdny', 'DiffWalk'
 ]
+
+def anos_disponiveis(inicio=2015):
+    """
+    Retorna uma lista de anos desde o início informado até o ano atual.
+
+    Args:
+        inicio (int): Ano inicial (padrão 2015).
+
+    Returns:
+        list[int]: Lista de anos.
+    """
+    ano_atual = datetime.datetime.now().year
+    return list(range(inicio, ano_atual + 1))
 
 def baixar_arquivo(url, caminho_destino):
     """
@@ -178,14 +205,22 @@ def limpar_dados(df, ano):
     # Renomeia colunas para formato padrão
     df.rename(columns=RENOMEAR_COLUNAS, inplace=True)
 
+    # Cria colunas faltantes e preenche com a moda do ano anterior
+    if 'BpHigh4' not in df.columns:
+        df['BpHigh4'] = np.nan
+    if 'ToldHi2' not in df.columns:
+        df['ToldHi2'] = np.nan
+
     return df
 
-def imputar_dados(df):
+def imputar_dados(df, moda_anteriores=None):
     """
     Imputa dados faltantes, usando a média para numéricas e moda para categóricas.
+    Também imputa com a moda do ano anterior, se disponível.
 
     Args:
         df (pd.DataFrame): DataFrame limpo, porém com valores faltantes.
+        moda_anteriores (dict): Moda das colunas do ano anterior.
 
     Returns:
         pd.DataFrame: DataFrame com valores faltantes imputados.
@@ -206,33 +241,33 @@ def imputar_dados(df):
                 moda = df[col].mode()
                 if not moda.empty:
                     moda_valor = moda[0]
+                    # Adiciona a moda como uma nova categoria caso não exista
+                    if moda_valor not in df[col].cat.categories:
+                        df[col] = df[col].cat.add_categories(moda_valor)
                     df[col] = df[col].fillna(moda_valor)
                     logging.info(f"Imputando moda '{moda_valor}' na coluna categórica '{col}'")
+                elif moda_anteriores is not None and col in moda_anteriores:
+                    moda_valor = moda_anteriores[col]
+                    # Adiciona a moda como uma nova categoria caso não exista
+                    if moda_valor not in df[col].cat.categories:
+                        df[col] = df[col].cat.add_categories(moda_valor)
+                    df[col] = df[col].fillna(moda_valor)
+                    logging.info(f"Imputando moda '{moda_valor}' do ano anterior na coluna '{col}'")
                 else:
                     logging.warning(f"Não foi possível imputar moda na coluna '{col}', valor nulo permanece.")
 
     return df
 
-def anos_disponiveis(inicio=2015):
-    """
-    Retorna uma lista de anos desde o início informado até o ano atual.
 
-    Args:
-        inicio (int): Ano inicial (padrão 2015).
 
-    Returns:
-        list[int]: Lista de anos.
-    """
-    ano_atual = datetime.datetime.now().year
-    return list(range(inicio, ano_atual + 1))
-
-def pipeline_brfss(ano):
+def pipeline_brfss(ano, moda_anteriores=None):
     """
     Executa o pipeline completo para o ano: download, extração,
     limpeza, imputação e salvamento dos dados.
 
     Args:
         ano (int): Ano do dataset a processar.
+        moda_anteriores (dict): Moda das colunas do ano anterior.
     """
     url = f"https://www.cdc.gov/brfss/annual_data/{ano}/files/LLCP{ano}XPT.zip"
     pasta_raw = os.path.join(BASE_DIR, "data", "raw")
@@ -253,34 +288,40 @@ def pipeline_brfss(ano):
     # Se dados limpos já existem, pula processamento
     if os.path.exists(caminho_cleaned):
         logging.info(f"Dados limpos para o ano {ano} já existem, pulando.")
-        return
+        return moda_anteriores
 
     # Se CSV bruto não existe, baixa e extrai
     if not os.path.exists(caminho_csv):
         sucesso = baixar_arquivo(url, caminho_zip)
         if not sucesso:
             logging.warning(f"Pulando o ano {ano} porque o arquivo não está disponível.")
-            return
+            return moda_anteriores
         extrair_zip(caminho_zip, pasta_extracao)
         logging.info(f"Lendo arquivo XPT para o ano {ano} ...")
         df, meta = ler_xpt_com_fallback(caminho_xpt)
         logging.info(f"Salvando CSV bruto em {caminho_csv} ...")
         df.to_csv(caminho_csv, index=False)
     else:
-        logging.info(f"CSV bruto para o ano {ano} já existe, carregando...")
+        logging.info(f"CSV bruto para o ano {ano} já existe, carregando...") 
         df = pd.read_csv(caminho_csv)
 
     # Limpa e imputa dados
     logging.info(f"Limpando dados para o ano {ano} ...")
     df_clean = limpar_dados(df, ano)
     logging.info(f"Imputando valores faltantes para o ano {ano} ...")
-    df_imputado = imputar_dados(df_clean)
+    df_imputado = imputar_dados(df_clean, moda_anteriores)
 
     # Salva dados limpos e imputados
     df_imputado.to_csv(caminho_cleaned, index=False)
     logging.info(f"Dados limpos e imputados salvos em {caminho_cleaned}.")
 
+    # Calcula e retorna as modas para o próximo ano
+    moda_anteriores = {col: df_imputado[col].mode()[0] for col in COLUNAS_CATEGORICAS if col in df_imputado.columns}
+    
+    return moda_anteriores
+
 if __name__ == "__main__":
     anos = anos_disponiveis()
+    moda_anteriores = None
     for ano in anos:
-        pipeline_brfss(ano)
+        moda_anteriores = pipeline_brfss(ano, moda_anteriores)
