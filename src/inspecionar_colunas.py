@@ -4,10 +4,9 @@ import difflib
 
 # Lista de colunas desejadas, incluindo DIABETE3 e DIABETE4 para inspeção
 COLUNAS_KAGGLE = [
-    'DIABETE3', 'DIABETE4', 'SEX', 'MARITAL', 'EDUCA', 'EMPLOY1', 'INCOME2',
-    'GENHLTH', 'PHYSHLTH', 'MENTHLTH', 'POORHLTH', 'HLTHPLN1',
-    'CHECKUP1', 'BPHIGH4', 'TOLDHI2', 'CVDSTRK3', 'CHCSCNCR', 'CHCOCNCR',
-    'CHCCOPD1', 'HAVARTH3', 'ADDEPEV2', 'CHCKIDNY', 'DIFFWALK'
+    'DIABETE3', 'DIABETE4', 'BPHIGH4', 'TOLDHI2', 'CHOLCHK', '_BMI5', '_SMOKER3', 
+    'CVDSTRK3', 'CVDCRHD4', 'EXERANY2', '_FRTLT1', '_VEGLT1', '_RFDRHV5', 'HLTHPLN1',
+    'MEDCOST', 'GENHLTH', 'MENTHLTH', 'PHYSHLTH', 'DIFFWALK', 'SEX', '_AGEG5YR', 'EDUCA', 'INCOME2'
 ]
 
 def mapear_colunas_parecidas(colunas_reais, colunas_desejadas, limite=0.8):

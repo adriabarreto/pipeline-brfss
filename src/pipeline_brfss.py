@@ -26,12 +26,45 @@ logging.basicConfig(
 
 # Lista de colunas que usaremos do dataset BRFSS (base CDC/Kaggle)
 COLUNAS_KAGGLE = [
-    'DIABETE3', 'DIABETE4', 'SEX', 'MARITAL', 'EDUCA', 'EMPLOY1', 'INCOME2',
-    'GENHLTH', 'PHYSHLTH', 'MENTHLTH', 'POORHLTH', 'HLTHPLN1',
-    'CHECKUP1', 'BPHIGH4', 'TOLDHI2', 'CVDSTRK3', 'CHCSCNCR', 'CHCOCNCR',
-    'CHCCOPD1', 'HAVARTH3', 'ADDEPEV2', 'CHCKIDNY', 'DIFFWALK', 'CHCCOPD2', 'HAVARTH4',
-    'ADDEPEV3', 'CHCKDNY2', 'BPHIGH6', 'TOLDHI3', 'CHCCOPD3', 'HAVARTH5', 'INCOME3', '_HLTHPLN',
-    'CHCSCNC1', 'CHCOCNC1'
+   "DIABETE3",
+   "DIABETE4",
+   "_AGEG5YR",
+    "_BMI5",
+    "_FRTLT1",
+    "_FRTLT1A",
+    "_HLTHPL1",
+    "_HLTHPLN",
+    "_RFDRHV5",
+    "_RFDRHV6",
+    "_RFDRHV7",
+    "_RFDRHV8",
+    "_SMOKER3",
+    "_SEX",
+    "_VEGLT1",
+    "_VEGLT1A",
+    "BPHIGH4",
+    "BPHIGH6",
+    "CHOLCHK",
+    "CHOLCHK1",
+    "CHOLCHK2",
+    "CHOLCHK3",
+    "CVDCRHD4",
+    "CVDSTRK3",
+    "DIFFWALK",
+    "EDUCA",
+    "EXERANY2",
+    "GENHLTH",
+    "HLTHPLN1",
+    "INCOME2",
+    "INCOME3",
+    "MEDCOST",
+    "MEDCOST1",
+    "MENTHLTH",
+    "PHYSHLTH",
+    "SEX",
+    "SEX1",
+    "TOLDHI2",
+    "TOLDHI3"
 ]
 
 # Mapeamento para binarizar a variável alvo 'Diabetes'
@@ -47,40 +80,65 @@ MAPEAMENTO_DIABETES = {
 
 # Renomeação das colunas para formato mais amigável (padronizado Kaggle)
 RENOMEAR_COLUNAS = {
-    'SEX': 'Sex',
-    'MARITAL': 'Marital',
-    'EDUCA': 'Educa',
-    'EMPLOY1': 'Employ1',
-    'INCOME2': 'Income2',
+    'BPHIGH4': 'HighBP',
+    'BPHIGH6': 'HighBP',
+
+    'TOLDHI2': 'HighChol',
+    'TOLDHI3': 'HighChol',
+
+    'CHOLCHK': 'CholCheck',
+    'CHOLCHK1': 'CholCheck',
+    'CHOLCHK2': 'CholCheck',
+    'CHOLCHK3': 'CholCheck',
+
+    '_BMI5': 'BMI',
+
+    '_SMOKER3': 'Smoker',
+
+    'CVDSTRK3': 'Stroke',
+
+    'CVDCRHD4': 'HeartDiseaseorAttack',
+
+    'EXERANY2': 'PhysActivity',
+
+    '_FRTLT1': 'Fruits',
+    '_FRTLT1A': 'Fruits',
+
+    '_VEGLT1': 'Veggies',
+    '_VEGLT1A': 'Veggies',
+
+    '_RFDRHV5': 'HvyAlcoholConsump',
+    '_RFDRHV6': 'HvyAlcoholConsump',
+    '_RFDRHV7': 'HvyAlcoholConsump',
+    '_RFDRHV8': 'HvyAlcoholConsump',
+
+    'HLTHPLN1': 'AnyHealthcare',
+    '_HLTHPLN': 'AnyHealthcare',
+    '_HLTHPL1': 'AnyHealthcare',
+
+    'MEDCOST': 'NoDocbcCost',
+    'MEDCOST1': 'NoDocbcCost',
+
     'GENHLTH': 'GenHlth',
-    'PHYSHLTH': 'PhysHlth',
+
     'MENTHLTH': 'MentHlth',
-    'POORHLTH': 'PoorHlth',
-    'HLTHPLN1': 'HlthPln1',
-    'CHECKUP1': 'Checkup1',
-    'BPHIGH4': 'BpHigh4',
-    'TOLDHI2': 'ToldHi2',
-    'CVDSTRK3': 'CvdStrk3',
-    'CHCSCNCR': 'ChcScncr',
-    'CHCOCNCR': 'ChcoCncr',
-    'CHCCOPD1': 'ChcCopd1',
-    'HAVARTH3': 'HavArth3',
-    'ADDEPEV2': 'AddEpev2',
-    'CHCKIDNY': 'ChkIdny',
+
+    'PHYSHLTH': 'PhysHlth',
+
     'DIFFWALK': 'DiffWalk',
-    'CHCCOPD2': 'ChcCopd1',
-    'HAVARTH4': 'HavArth3',
-    'ADDEPEV3': 'AddEpev2',
-    'CHCKDNY2': 'ChkIdny',
-    'BPHIGH6' : 'BpHigh4',
-    'TOLDHI3' : 'ToldHi2',
-    'CHCCOPD3': 'ChcCopd1',
-    'HAVARTH5': 'HavArth3',
-    'INCOME3': 'Income2',
-    '_HLTHPLN': 'HlthPln1',
-    'CHCSCNC1': 'ChcScncr',
-    'CHCOCNC1': 'CHCOCNC1'
+
+    'SEX': 'Sex',
+    'SEX1': 'Sex',
+    '_SEX': 'Sex',
+
+    '_AGEG5YR': 'Age',
+
+    'EDUCA': 'Education',
+
+    'INCOME2': 'Income',
+    'INCOME3': 'Income'
 }
+
 
 # Valores inválidos que serão convertidos em NaN (dados ausentes, recusados, etc)
 INVALIDOS = [
@@ -93,7 +151,8 @@ INVALIDOS = [
 COLUNAS_CATEGORICAS = [
     'Sex', 'Marital', 'Educa', 'Employ1', 'Income2', 'GenHlth', 'HlthPln1',
     'Checkup1', 'BpHigh4', 'ToldHi2', 'CvdStrk3', 'ChcScncr', 'ChcoCncr',
-    'ChcCopd1', 'HavArth3', 'AddEpev2', 'ChkIdny', 'DiffWalk'
+    'ChcCopd1', 'HavArth3', 'AddEpev2', 'ChkIdny', 'DiffWalk',
+    'Smoker', 'PhysActivity', 'Income'  # << adicione aqui
 ]
 
 def anos_disponiveis(inicio=2015):
@@ -205,11 +264,23 @@ def limpar_dados(df, ano):
     # Renomeia colunas para formato padrão
     df.rename(columns=RENOMEAR_COLUNAS, inplace=True)
 
+    # Corrigir BMI dividindo por 100 se valores parecem muito grandes
+    if 'BMI' in df.columns:
+        df['BMI'] = df['BMI'] / 100
+        logging.info("Corrigindo valores da coluna 'BMI' dividindo por 100.")
+
     # Cria colunas faltantes e preenche com a moda do ano anterior
-    if 'BpHigh4' not in df.columns:
-        df['BpHigh4'] = np.nan
-    if 'ToldHi2' not in df.columns:
-        df['ToldHi2'] = np.nan
+    if 'HighBP' not in df.columns:
+        df['HighBP'] = np.nan
+    if 'HighChol' not in df.columns:
+        df['HighChol'] = np.nan
+    if 'Fruits' not in df.columns:
+        df['Fruits'] = np.nan
+    if 'Veggies' not in df.columns:
+        df['Veggies'] = np.nan
+
+    return df
+
 
     return df
 
@@ -257,6 +328,33 @@ def imputar_dados(df, moda_anteriores=None):
                     logging.warning(f"Não foi possível imputar moda na coluna '{col}', valor nulo permanece.")
 
     return df
+
+def garantir_binarias(df):
+    variaveis_binarias = [
+        'Diabetes_binary', 'HighBP', 'HighChol', 'CholCheck', 'Smoker',
+        'Stroke', 'HeartDiseaseorAttack', 'PhysActivity', 'Fruits', 'Veggies',
+        'HvyAlcoholConsump', 'AnyHealthcare', 'NoDocbcCost', 'DiffWalk', 'Sex'
+    ]
+    
+    for var in variaveis_binarias:
+        if var in df.columns:
+            df[var] = df[var].replace(INVALIDOS, np.nan)
+            
+            if var == 'Sex':
+                # Mapear Sex (1->1, 2->0), adicionar categoria 0 se for categorical
+                df[var] = df[var].map({1:1, 2:0})
+                if isinstance(df[var].dtype, pd.CategoricalDtype):
+                    if 0 not in df[var].cat.categories:
+                        df[var] = df[var].cat.add_categories(0)
+                df[var] = df[var].fillna(0).astype(int)
+            else:
+                if isinstance(df[var].dtype, pd.CategoricalDtype):
+                    if 0 not in df[var].cat.categories:
+                        df[var] = df[var].cat.add_categories(0)
+                df[var] = df[var].fillna(0)
+                df[var] = df[var].apply(lambda x: 1 if x > 0 else 0).astype(int)
+    return df
+
 
 
 
@@ -310,6 +408,9 @@ def pipeline_brfss(ano, moda_anteriores=None):
     df_clean = limpar_dados(df, ano)
     logging.info(f"Imputando valores faltantes para o ano {ano} ...")
     df_imputado = imputar_dados(df_clean, moda_anteriores)
+
+    # Garantir variáveis binárias no final
+    df_imputado = garantir_binarias(df_imputado)
 
     # Salva dados limpos e imputados
     df_imputado.to_csv(caminho_cleaned, index=False)
