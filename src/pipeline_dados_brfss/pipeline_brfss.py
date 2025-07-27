@@ -8,7 +8,7 @@ import numpy as np
 import logging
 
 # Diretório base do projeto (pasta acima da pasta 'src')
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
 # Configuração do logging para registrar informações sobre o processo
 data_dir = os.path.join(BASE_DIR, "data")
