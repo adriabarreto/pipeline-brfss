@@ -13,31 +13,40 @@ jobs:
       - name: Checkout repositório
         uses: actions/checkout@v3
 
+      - name: Instalar Python e Poetry
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'  # Ajuste conforme sua versão suportada
+
+      - name: Instalar Poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Instalar dependências com Poetry
+        run: poetry install
+
       - name: Verificar existência dos CSVs limpos
         id: verificar_csv
         run: |
           if ls data/cleaned/*.csv 1> /dev/null 2>&1; then
-            echo "CSV limpo encontrado."
-            echo "::set-output name=csv_existe::true"
+            echo "csv_existe=true" >> $GITHUB_OUTPUT
           else
-            echo "Nenhum CSV limpo encontrado."
-            echo "::set-output name=csv_existe::false"
+            echo "csv_existe=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Rodar a pipeline (se CSVs não existirem)
         if: steps.verificar_csv.outputs.csv_existe == 'false'
         run: |
-          python src/pipeline_brfss.py
+          poetry run python src/pipeline_dados_brfss/pipeline_brfss.py
 
       - name: Verificar novamente os CSVs limpos
         id: verificar_csv_apos
         run: |
           if ls data/cleaned/*.csv 1> /dev/null 2>&1; then
-            echo "CSV limpo encontrado após pipeline."
-            echo "::set-output name=csv_existe_apos::true"
+            echo "csv_existe_apos=true" >> $GITHUB_OUTPUT
           else
-            echo "Nenhum CSV limpo encontrado após pipeline."
-            echo "::set-output name=csv_existe_apos::false"
+            echo "csv_existe_apos=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Criar release e enviar CSVs (se existirem)
