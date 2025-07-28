@@ -18,3 +18,4 @@ data/processed/
 # Arquivos de IDE
 .vscode/
 .idea/
+poetry.lock
